@@ -1,0 +1,120 @@
+[build-system]
+requires = ["flit-core >= 3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "asgi-sspi"
+authors = [
+  {name = "Doug Addy" },
+  {name = "Washed Out" },
+  {name = "Micheal Komitee" },
+  {name = "Joshua Bronson" },
+]
+maintainers = [
+  {name = "Doug Addy", email = "da1910@protonmail.com"}
+]
+license = {file = "LICENSE"}
+readme = {file = "README.rst", content-type="text/x-rst"}
+keywords = ["ASGI", "Authentication", "SSPI"]
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Development Status :: 2 - Pre-Alpha",
+  "Intended Audience :: Developers",
+  "Topic :: Internet :: WWW/HTTP :: WSGI :: Middleware",
+  "Operating System :: Microsoft :: Windows",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Private :: Do Not Upload"
+]
+requires-python = ">=3.7"
+
+dynamic = ["version", "description"]
+
+dependencies = [
+  "pyspnego==0.3.1",
+]
+
+[project.urls]
+Source = "https://github.com/pyansys/asgi_sspi"
+
+[project.optional-dependencies]
+test = [
+  "pytest",
+  "pytest-cov",
+  "pytest_mock",
+  "async_asgi_testclient",
+  "pytest-asyncio",
+]
+doc = [
+  "pyansys-sphinx-theme==0.2.0",
+  "numpydoc==1.1.0",
+  "sphinx==4.2.0",  # sphinx>4.2.0 not supported by enum_tools==0.6.5
+  "sphinx-autodoc-typehints==1.14.1",
+  "sphinx-notfound-page==0.8",
+  "sphinx-copybutton==0.4.0",
+  "enum_tools==0.6.5",
+  "sphinx-toolbox==2.15.3",  # Required by enum_tools
+  "jupyterlab==3.2.4",
+  "jupytext==1.13.3",
+  "lxml==4.6.4",
+  "tabulate==0.8.9",
+  "pandas==1.3.4",
+  "nbsphinx==0.8.7",
+]
+
+[tool.flit.module]
+name = "asgi_sspi"
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py37,py38,py39,coverage
+isolated_build = True
+[gh-actions]
+python =
+    3.7: py37
+    3.8: py38
+    3.9: py39
+    3.10: coverage
+[testenv]
+deps =
+  .[test]
+commands = pytest {posargs}
+
+[testenv:coverage]
+deps = {[testenv]deps}
+commands = pytest --cov=asgi_sspi --cov-report=xml ./tests {posargs}
+
+[testenv:lint]
+deps =
+    codespell==2.1.0
+    black
+    mypy==0.910
+commands =
+    codespell ./src ./tests ./examples ./doc/source
+    black ./src ./tests --check
+    mypy ./src
+"""
+
+[tool.mypy]
+warn_return_any = true
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+check_untyped_defs = true
+show_error_codes = true
+
+[tool.pytest.ini_options]
+testpaths = "./tests"
+asyncio_mode = "strict"
+markers = [
+    """integration: test requires a real database (deselect with '-m \"not integration\"')"""
+]
+
+[tool.black]
+line-length = 120
