@@ -94,7 +94,7 @@ deps =
     black
     mypy==0.910
 commands =
-    codespell ./src ./tests ./examples ./doc/source
+    codespell ./src ./tests
     black ./src ./tests --check
     mypy ./src
 """
