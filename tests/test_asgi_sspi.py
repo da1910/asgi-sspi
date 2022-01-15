@@ -248,7 +248,7 @@ async def test_authorized(successful_auth):
 async def test_authorized_any_hostname(successful_auth):
     """
     Ensure that the server can find matching hostname entry from the keytab.
-    We set hostname="" in this test to achive this.
+    We set hostname="" in this test to achieve this.
     """
     step, decode = successful_auth
 
