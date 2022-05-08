@@ -1,8 +1,10 @@
 import base64
+from sys import platform
 
 import pytest
 from async_asgi_testclient import TestClient
 from spnego._sspi import SSPIProxy
+from spnego._negotiate import NegotiateProxy
 
 from asgi_sspi import SPNEGOAuthMiddleware
 
@@ -12,26 +14,41 @@ CLIENT_TOKEN = "CTOKEN"
 SERVER_TOKEN = b"STOKEN"
 ENCODED_SERVER_TOKEN = base64.b64encode(SERVER_TOKEN).decode()
 
+USE_SSPI = False
+if platform == "win32":
+    USE_SSPI = True
+
 
 @pytest.fixture(autouse=True)
-def disable_sspi_flow(mocker):
-    mocker.patch("spnego._sspi.acquire_credentials_handle", lambda **kwargs: None)
+def disable_gssapi_flow(mocker):
+    if USE_SSPI:
+        mocker.patch("spnego._sspi.acquire_credentials_handle", lambda **kwargs: None)
 
 
 @pytest.fixture
 def successful_auth(mocker):
-    mocker.patch.object(SSPIProxy, "client_principal", "user@EXAMPLE.ORG")
-    mocker.patch.object(SSPIProxy, "complete", True)
-    step = mocker.patch.object(SSPIProxy, "step")
+    if USE_SSPI:
+        mocker.patch.object(SSPIProxy, "client_principal", "user@EXAMPLE.ORG")
+        mocker.patch.object(SSPIProxy, "complete", True)
+        step = mocker.patch.object(SSPIProxy, "step")
+    else:
+        mocker.patch.object(NegotiateProxy, "client_principal", "user@EXAMPLE.ORG")
+        mocker.patch.object(NegotiateProxy, "complete", True)
+        step = mocker.patch.object(NegotiateProxy, "step")
     decode = mocker.patch("base64.b64decode")
     yield step, decode
 
 
 @pytest.fixture
 def unsuccessful_auth(mocker):
-    mocker.patch.object(SSPIProxy, "client_principal", "user@EXAMPLE.ORG")
-    mocker.patch.object(SSPIProxy, "complete", False)
-    step = mocker.patch.object(SSPIProxy, "step")
+    if USE_SSPI:
+        mocker.patch.object(SSPIProxy, "client_principal", "user@EXAMPLE.ORG")
+        mocker.patch.object(SSPIProxy, "complete", False)
+        step = mocker.patch.object(SSPIProxy, "step")
+    else:
+        mocker.patch.object(NegotiateProxy, "client_principal", "user@EXAMPLE.ORG")
+        mocker.patch.object(NegotiateProxy, "complete", False)
+        step = mocker.patch.object(NegotiateProxy, "step")
     decode = mocker.patch("base64.b64decode")
     yield step, decode
 
