@@ -11,7 +11,7 @@ on:
 jobs:
   style_check:
     name: Check style with black and mypy
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
 
@@ -31,10 +31,11 @@ jobs:
 
   test:
     name: Unit test package
-    runs-on: windows-latest
     strategy:
       matrix:
         python-version: ['3.7', '3.8', '3.9', '3.10']
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v2
@@ -62,7 +63,7 @@ jobs:
 
   build:
     name: Build wheel
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
@@ -77,13 +78,13 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install flit
 
-      - name: Test with pytest
+      - name: Build wheel
         run: |
           flit build
 
       - name: Upload wheel
         uses: actions/upload-artifact@v2
         with:
-          name: asgi-sspi
+          name: asgi-gssapi
           path: dist/
           retention-days: 7
